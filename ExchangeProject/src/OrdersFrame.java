@@ -1,8 +1,5 @@
-
-
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -16,19 +13,18 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-public class ProductFrame extends JFrame{
-	JFrame frame = new JFrame("ProductFrame");
+
+public class OrdersFrame {
+JFrame frame = new JFrame("ProductFrame");
 	
 	//table for products
-	JTable productTable = new JTable();
-	JScrollPane scroller = new JScrollPane(productTable);
+	JTable ordersTable = new JTable();
+	JScrollPane scroller = new JScrollPane(ordersTable);
 	
 	
 	//connection
@@ -42,15 +38,15 @@ public class ProductFrame extends JFrame{
 	JPanel midPanel = new JPanel();
 	JPanel downPanel = new JPanel();
 	
-	JLabel prodNameL = new JLabel("Product Name:");
-	JLabel beginPriceL = new JLabel("Begin Price:");
-	JLabel stockPriceL = new JLabel("Stock Price:");
-	JLabel quantityL = new JLabel("Quantity");
+	JLabel productNameL = new JLabel("Product");
+	JLabel productQuantityL = new JLabel("Product quantity");
+	JLabel sellerIdL = new JLabel("Seller");
+	JLabel buyerIdL = new JLabel("Buyer");
 	
-	JTextField prodNameTF = new JTextField();
-	JTextField beginPriceTF = new JTextField();
-	JTextField stockPriceTF = new JTextField();
-	JTextField quantityTF = new JTextField();
+	JComboBox<String> prodNameTF = new JComboBox<String>();
+	JTextField productQuantityTF = new JTextField();
+	JComboBox<String> sellerIdTF = new JComboBox<String>();
+	JComboBox<String> buyerIdTF = new JComboBox<String>();
 
 			
 	JButton addBtn = new JButton("Add");
@@ -60,22 +56,23 @@ public class ProductFrame extends JFrame{
 	JButton searchBtn = new JButton("Search");
 	JButton allBtn = new JButton("All");
 	
-		public ProductFrame() {
-			frame.setSize(500, 600);
+		public OrdersFrame() {
+			frame.setSize(600, 800);
 			//frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
 			
 			frame.setLayout(new GridLayout(4,1));
 
 			//Up Panel
 			upPanel.setLayout(new GridLayout(4, 2));
-			upPanel.add(prodNameL);
+			upPanel.add(productNameL);
 			upPanel.add(prodNameTF);
-			upPanel.add(beginPriceL);
-			upPanel.add(beginPriceTF);
-			upPanel.add(stockPriceL);
-			upPanel.add(stockPriceTF);
-			upPanel.add(quantityL);
-			upPanel.add(quantityTF);
+			upPanel.add(productQuantityL);
+			upPanel.add(productQuantityTF);
+			upPanel.add(sellerIdL);
+			upPanel.add(sellerIdTF);
+			upPanel.add(buyerIdL);
+			upPanel.add(buyerIdTF);
+			upPanel.add(allBtn);
 			
 			frame.add(upPanel);
 			
@@ -96,14 +93,14 @@ public class ProductFrame extends JFrame{
 			searchBtn.addActionListener(new SearchAction());
 			allBtn.addActionListener(new SearchAllAction());
 			
-			DBHelper.FillCombo(searchCombo, "PRODUCT_NAME",  "PRODUCTS");
+			DBHelper.FillCombo(searchCombo, "PRODUCT_ID",  "ORDERS");
 			
 			//Down Panel
 			
 			downPanel.add(scroller);
 			scroller.setPreferredSize(new Dimension(450, 150));
-			productTable.setModel(DBHelper.getAllData("PRODUCTS"));
-			productTable.addMouseListener(new TableListener());
+			ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+			ordersTable.addMouseListener(new TableListener());
 			
 			frame.add(downPanel);
 			
@@ -116,17 +113,17 @@ public class ProductFrame extends JFrame{
 		// clearForm to string
 		public void clearForm() {
 			prodNameTF.setText("");
-			beginPriceTF.setText("");
-			stockPriceTF.setText("");
-			quantityTF.setText("");
+			productQuantityTF.setText("");
+			sellerIdTF.setText("");
+			buyerIdTF.setText("");
 		}
 		class TableListener implements MouseListener{
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				// TODO Auto-generated method stub
-				int row = productTable.getSelectedRow();
-				id = Integer.parseInt(productTable.getValueAt(row, 0).toString());
+				int row = ordersTable.getSelectedRow();
+				id = Integer.parseInt(ordersTable.getValueAt(row, 0).toString());
 			}
 
 			@Override
@@ -158,21 +155,21 @@ public class ProductFrame extends JFrame{
 		class AddAction implements ActionListener{
 			public void actionPerformed(ActionEvent arg0) {
 				String prodName = prodNameTF.getText();
-				float beginPrice = Float.parseFloat(beginPriceTF.getText());
-				float stockPrice = Float.parseFloat(stockPriceTF.getText());
-				int quantity = Integer.parseInt(quantityTF.getText());
+				float productQuantity = Float.parseFloat(productQuantityTF.getText());
+				float sellerId = Float.parseFloat(sellerIdTF.getText());
+				int buyerId = Integer.parseInt(buyerIdTF.getText());
 				
 				conn = DBHelper.getConnection();
 				try {
-					state = conn.prepareStatement("INSERT INTO PRODUCTS VALUES(null, ?, ?, ?, ?);");
+					state = conn.prepareStatement("INSERT INTO ORDERS VALUES(null, ?, ?, ?, ?);");
 					state.setString(1, prodName);
-					state.setFloat(2, beginPrice);
-					state.setFloat(3, stockPrice);
-					state.setInt(4, quantity);
+					state.setFloat(2, productQuantity);
+					state.setFloat(3, sellerId);
+					state.setInt(4, buyerId);
 					
 					state.execute();
-					productTable.setModel(DBHelper.getAllData("PRODUCTS"));
-					DBHelper.FillCombo(searchCombo, "PRODUCT_NAME",  "PRODUCTS");
+					ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+					DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -196,12 +193,12 @@ public class ProductFrame extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				conn = DBHelper.getConnection();
-				String sql = "DELETE FROM PRODUCTS WHERE ID=?";
+				String sql = "DELETE FROM ORDERS WHERE ID=?";
 				try {
 					state = conn.prepareStatement(sql);
 					state.setInt(1, id);
 					state.execute();
-					productTable.setModel(DBHelper.getAllData("PRODUCTS"));
+					ordersTable.setModel(DBHelper.getAllData("ORDERS"));
 					id = -1;
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
@@ -217,15 +214,15 @@ public class ProductFrame extends JFrame{
 				// TODO Auto-generated method stub
 				String item = searchCombo.getSelectedItem().toString();
 				String [] content = item.split(" ");
-				int personId = Integer.parseInt(content[0]);
+				int orderId = Integer.parseInt(content[0]);
 				
 				conn = DBHelper.getConnection();
 				String sql = "select * from products where id=?";
 				try {
 					state = conn.prepareStatement(sql);
-					state.setInt(1, personId);
+					state.setInt(1, orderId);
 					result = state.executeQuery();
-					productTable.setModel(new MyModel(result));
+					ordersTable.setModel(new MyModel(result));
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -242,12 +239,12 @@ public class ProductFrame extends JFrame{
 				// TODO Auto-generated method stub
 					conn = DBHelper.getConnection();
 				
-					String sql = "SELECT * FROM PRODUCTS";
+					String sql = "SELECT * FROM ORDERS";
 					
 					try {
 						state = conn.prepareStatement(sql);
 						state.execute();	
-						productTable.setModel(DBHelper.getAllData("PRODUCTS"));
+						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
 						
 						
 					} catch (SQLException e1) {
@@ -258,4 +255,3 @@ public class ProductFrame extends JFrame{
 			}
 		}
 }
- 

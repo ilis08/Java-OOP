@@ -4,6 +4,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.swing.JComboBox;
+
 public class DBHelper {
 	
 	public static Connection conn = null;
@@ -42,4 +44,29 @@ public class DBHelper {
 		
 		return model;
 	}
+	
+	static void FillCombo(JComboBox<String> combo,String name, String tableName) {
+		
+		conn = getConnection();
+		String sql = "select id, " + name + " from " + tableName;
+		try {
+			state = conn.prepareStatement(sql);
+			result = state.executeQuery();
+			combo.removeAllItems();
+			while(result.next()) {
+				String item = result.getObject(1).toString()+ " " + result.getObject(2).toString();				combo.addItem(item);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	static void FillComboOrder(JComboBox<String> prodName, JComboBox<String> sellerId, )
 }
+
+
+
+
+
+

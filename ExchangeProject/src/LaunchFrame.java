@@ -49,7 +49,20 @@ public class LaunchFrame extends JFrame implements ActionListener {
 		usersBtn.setBounds(100,160,200,40);
 		frame.add(usersBtn);
 		
+		JButton ordersBtn = new JButton("Add new Order");
 		
+		ordersBtn.setFocusable(false);
+		ordersBtn.addActionListener(new ActionListener() {
+			@Override
+			
+			public void actionPerformed(ActionEvent e) {
+				if(e.getSource()==ordersBtn) {
+					OrdersFrame orderFrame = new OrdersFrame();
+				}
+			}
+		});
+		ordersBtn.setBounds(100,160,200,40);
+		frame.add(ordersBtn);
 		
 		frame.setVisible(true);
 	}
