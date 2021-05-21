@@ -154,17 +154,17 @@ JFrame frame = new JFrame("ProductFrame");
 		
 		class AddAction implements ActionListener{
 			public void actionPerformed(ActionEvent arg0) {
-				String prodName = prodNameTF.getText();
-				float productQuantity = Float.parseFloat(productQuantityTF.getText());
-				float sellerId = Float.parseFloat(sellerIdTF.getText());
+				int prodName = Integer.parseInt(prodNameTF.getText());
+				int productQuantity = Integer.parseInt(productQuantityTF.getText());
+				int sellerId = Integer.parseInt(sellerIdTF.getText());
 				int buyerId = Integer.parseInt(buyerIdTF.getText());
 				
 				conn = DBHelper.getConnection();
 				try {
 					state = conn.prepareStatement("INSERT INTO ORDERS VALUES(null, ?, ?, ?, ?);");
-					state.setString(1, prodName);
-					state.setFloat(2, productQuantity);
-					state.setFloat(3, sellerId);
+					state.setInt(1, prodName);
+					state.setInt(2, productQuantity);
+					state.setInt(3, sellerId);
 					state.setInt(4, buyerId);
 					
 					state.execute();
