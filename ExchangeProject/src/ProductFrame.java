@@ -27,14 +27,16 @@ public class ProductFrame extends JFrame{
 	JFrame frame = new JFrame("ProductFrame");
 	
 	//table for products
-	JTable productTable = new JTable();
+	public JTable productTable = new JTable();
 	JScrollPane scroller = new JScrollPane(productTable);
 	
 	
+	int row;
+	
 	//connection
-	private Connection conn = null;
-	private PreparedStatement state = null;
-	private ResultSet result = null;
+	public Connection conn = null;
+	public PreparedStatement state = null;
+	public ResultSet result = null;
 	// id for row from table
 	int id = -1;
 	
@@ -95,6 +97,7 @@ public class ProductFrame extends JFrame{
 			deleteBtn.addActionListener(new DeleteAction());
 			searchBtn.addActionListener(new SearchAction());
 			allBtn.addActionListener(new SearchAllAction());
+			editBtn.addActionListener(new EditAction());
 			
 			DBHelper.FillCombo(searchCombo, "PRODUCT_NAME",  "PRODUCTS");
 			
@@ -120,13 +123,20 @@ public class ProductFrame extends JFrame{
 			stockPriceTF.setText("");
 			quantityTF.setText("");
 		}
-		class TableListener implements MouseListener{
+		public class TableListener implements MouseListener{
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				// TODO Auto-generated method stub
-				int row = productTable.getSelectedRow();
+				row = productTable.getSelectedRow();
 				id = Integer.parseInt(productTable.getValueAt(row, 0).toString());
+			
+				if(e.getClickCount()==2) {
+					prodNameTF.setText(productTable.getValueAt(row, 1).toString());
+					beginPriceTF.setText(productTable.getValueAt(row, 2).toString());
+					stockPriceTF.setText(productTable.getValueAt(row, 3).toString());
+					quantityTF.setText(productTable.getValueAt(row, 4).toString());
+				}
 			}
 
 			@Override
@@ -155,20 +165,23 @@ public class ProductFrame extends JFrame{
 			
 		}
 		
-		class AddAction implements ActionListener{
+		public class AddAction implements ActionListener{
 			public void actionPerformed(ActionEvent arg0) {
 				String prodName = prodNameTF.getText();
 				float beginPrice = Float.parseFloat(beginPriceTF.getText());
 				float stockPrice = Float.parseFloat(stockPriceTF.getText());
 				int quantity = Integer.parseInt(quantityTF.getText());
+				float profit =  stockPrice - beginPrice ;
 				
 				conn = DBHelper.getConnection();
 				try {
-					state = conn.prepareStatement("INSERT INTO PRODUCTS VALUES(null, ?, ?, ?, ?);");
+					state = conn.prepareStatement("INSERT INTO PRODUCTS VALUES(null, ?, ?, ?, ?, ?);");
 					state.setString(1, prodName);
 					state.setFloat(2, beginPrice);
 					state.setFloat(3, stockPrice);
 					state.setInt(4, quantity);
+					state.setFloat(5, profit);
+					
 					
 					state.execute();
 					productTable.setModel(DBHelper.getAllData("PRODUCTS"));
@@ -190,7 +203,7 @@ public class ProductFrame extends JFrame{
 			}
 		}
 		
-		class DeleteAction implements ActionListener{
+		public class DeleteAction implements ActionListener{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -210,7 +223,27 @@ public class ProductFrame extends JFrame{
 			}
 		}
 
-		class SearchAction implements ActionListener{
+		
+		public class EditAction implements ActionListener{
+			public void actionPerformed(ActionEvent e) {
+			
+					conn = DBHelper.getConnection();
+					String sql = "UPDATE PRODUCTS SET PRODUCT_NAME = \'" + prodNameTF.getText() + "\', BEGIN_PRICE = \'"  + beginPriceTF.getText() + "\' , STOCK_PRICE = \'" + stockPriceTF.getText() + "\', QUANTITY = \'" + quantityTF.getText() + "\' WHERE ID=?;";
+					try {
+						state = conn.prepareStatement(sql);
+						state.setInt(1, id);
+						state.execute();
+						id = -1;
+						productTable.setModel(DBHelper.getAllData("PRODUCTS"));
+						DBHelper.FillCombo(searchCombo, "PRODUCT_NAME",  "PRODUCTS");
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			}
+		}
+		
+		public class SearchAction implements ActionListener{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -237,7 +270,7 @@ public class ProductFrame extends JFrame{
 			
 		}
 
-		class SearchAllAction implements ActionListener{
+		public class SearchAllAction implements ActionListener{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 					conn = DBHelper.getConnection();
@@ -254,8 +287,8 @@ public class ProductFrame extends JFrame{
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-				
+				}
 			}
-		}
+		
+		
 }
- 

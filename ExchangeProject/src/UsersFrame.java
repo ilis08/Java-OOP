@@ -23,19 +23,21 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
+import ProductFrame.EditAction;
+
 
 public class UsersFrame extends JFrame {
 JFrame frame = new JFrame("UsersFrame");
 	
 	//table for products
-	JTable usersTable = new JTable();
+	public JTable usersTable = new JTable();
 	JScrollPane scroller = new JScrollPane(usersTable);
 	
 	
 	//connection
-	private Connection conn = null;
-	private PreparedStatement state = null;
-	private ResultSet result = null;
+	public Connection conn = null;
+	public PreparedStatement state = null;
+	public ResultSet result = null;
 	// id for row from table
 	int id = -1;
 	
@@ -96,6 +98,7 @@ JFrame frame = new JFrame("UsersFrame");
 			deleteBtn.addActionListener(new DeleteAction());
 			searchBtn.addActionListener(new SearchAction());
 			allBtn.addActionListener(new SearchAllAction());
+			editBtn.addActionListener(new EditAction());
 			
 			DBHelper.FillCombo(searchCombo, "NAME",  "USERS");
 			
@@ -121,13 +124,20 @@ JFrame frame = new JFrame("UsersFrame");
 			cityTF.setText("");
 			streetTF.setText("");
 		}
-		class TableListener implements MouseListener{
+		public class TableListener implements MouseListener{
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				// TODO Auto-generated method stub
 				int row = usersTable.getSelectedRow();
 				id = Integer.parseInt(usersTable.getValueAt(row, 0).toString());
+			
+				if(e.getClickCount()==2) {
+					userNameTF.setText(usersTable.getValueAt(row, 1).toString());
+					ageTF.setText(usersTable.getValueAt(row, 2).toString());
+					cityTF.setText(usersTable.getValueAt(row, 3).toString());
+					streetTF.setText(usersTable.getValueAt(row, 4).toString());
+				}
 			}
 
 			@Override
@@ -156,7 +166,7 @@ JFrame frame = new JFrame("UsersFrame");
 			
 		}
 		
-		class AddAction implements ActionListener{
+		public class AddAction implements ActionListener{
 			public void actionPerformed(ActionEvent arg0) {
 				String userName = userNameTF.getText();
 				int age = Integer.parseInt(ageTF.getText());
@@ -191,7 +201,26 @@ JFrame frame = new JFrame("UsersFrame");
 			}
 		}
 		
-		class DeleteAction implements ActionListener{
+		public class EditAction implements ActionListener{
+			public void actionPerformed(ActionEvent e) {
+			
+					conn = DBHelper.getConnection();
+					String sql = "UPDATE USERS SET NAME = \'" + userNameTF.getText() + "\', AGE = \'"  + ageTF.getText() + "\' , CITY = \'" + cityTF.getText() + "\', STREET = \'" + streetTF.getText() + "\' WHERE ID=?;";
+					try {
+						state = conn.prepareStatement(sql);
+						state.setInt(1, id);
+						state.execute();
+						id = -1;
+						usersTable.setModel(DBHelper.getAllData("USERS"));
+						DBHelper.FillCombo(searchCombo, "NAME",  "USERS");
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+			}
+		}
+		
+		public class DeleteAction implements ActionListener{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -211,7 +240,7 @@ JFrame frame = new JFrame("UsersFrame");
 			}
 		}
 
-		class SearchAction implements ActionListener{
+		public class SearchAction implements ActionListener{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -238,7 +267,7 @@ JFrame frame = new JFrame("UsersFrame");
 			
 		}
 
-		class SearchAllAction implements ActionListener{
+		public class SearchAllAction implements ActionListener{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 					conn = DBHelper.getConnection();

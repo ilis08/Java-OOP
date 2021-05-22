@@ -19,7 +19,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 
-public class OrdersFrame {
+public class OrdersFrame extends JFrame{
 JFrame frame = new JFrame("ProductFrame");
 	
 	//table for products
@@ -31,7 +31,7 @@ JFrame frame = new JFrame("ProductFrame");
 	private Connection conn = null;
 	private PreparedStatement state = null;
 	private ResultSet result = null;
-	// id for row from table
+	 //id for row from table
 	int id = -1;
 	
 	JPanel upPanel = new JPanel();
@@ -74,9 +74,14 @@ JFrame frame = new JFrame("ProductFrame");
 			upPanel.add(buyerIdTF);
 			upPanel.add(allBtn);
 			
+			
+			DBHelper.FillCombo(prodNameTF, "Product_Name", "Products");
+			DBHelper.FillCombo(sellerIdTF, "Name", "Users");
+			DBHelper.FillCombo(buyerIdTF, "Name", "Users");
+			
 			frame.add(upPanel);
 			
-			// Mid Panel 
+			 //Mid Panel 
 			midPanel.add(addBtn);
 			midPanel.add(deleteBtn);
 			midPanel.add(editBtn);
@@ -99,7 +104,7 @@ JFrame frame = new JFrame("ProductFrame");
 			
 			downPanel.add(scroller);
 			scroller.setPreferredSize(new Dimension(450, 150));
-			ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+			ordersTable.setModel(DBHelper.getAllDataTable());
 			ordersTable.addMouseListener(new TableListener());
 			
 			frame.add(downPanel);
@@ -110,66 +115,141 @@ JFrame frame = new JFrame("ProductFrame");
 			frame.setVisible(true);
 		}
 		
-		// clearForm to string
-		public void clearForm() {
-			prodNameTF.setText("");
+		 //clearForm to string
+		public void clearForm() {			
 			productQuantityTF.setText("");
-			sellerIdTF.setText("");
-			buyerIdTF.setText("");
 		}
 		class TableListener implements MouseListener{
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				// TODO Auto-generated method stub
+				 //TODO Auto-generated method stub
 				int row = ordersTable.getSelectedRow();
 				id = Integer.parseInt(ordersTable.getValueAt(row, 0).toString());
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
+				 //TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
+				 //TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
+				 //TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
+				 //TODO Auto-generated method stub
 				
 			}
 			
-		}
 		
+		class DeleteAction implements ActionListener{
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				 //TODO Auto-generated method stub
+				conn = DBHelper.getConnection();
+				String sql = "DELETE FROM ORDERS WHERE ID=?";
+				try {
+					state = conn.prepareStatement(sql);
+					state.setInt(1, id);
+					state.execute();
+					ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+					id = -1;
+				} catch (SQLException e1) {
+					 //TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+
+		class SearchAction implements ActionListener{
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				 //TODO Auto-generated method stub
+				String item = searchCombo.getSelectedItem().toString();
+				String [] content = item.split(" ");
+				int orderId = Integer.parseInt(content[0]);
+				
+				conn = DBHelper.getConnection();
+				String sql = "select * from orders where id=?";
+				try {
+					state = conn.prepareStatement(sql);
+					state.setInt(1, orderId);
+					result = state.executeQuery();
+					ordersTable.setModel(new MyModel(result));
+				} catch (SQLException e1) {
+					 //TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (Exception e1) {
+					 //TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+			
+		}
+
+		class SearchAllAction implements ActionListener{
+			public void actionPerformed(ActionEvent e) {
+				 //TODO Auto-generated method stub
+					conn = DBHelper.getConnection();
+				
+					String sql = "SELECT * FROM ORDERS";
+					
+					try {
+						state = conn.prepareStatement(sql);
+						state.execute();	
+						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+						
+						
+					} catch (SQLException e1) {
+						 //TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				
+			}
+		}
+	}
+
+
 		class AddAction implements ActionListener{
 			public void actionPerformed(ActionEvent arg0) {
-				int prodName = Integer.parseInt(prodNameTF.getText());
-				int productQuantity = Integer.parseInt(productQuantityTF.getText());
-				int sellerId = Integer.parseInt(sellerIdTF.getText());
-				int buyerId = Integer.parseInt(buyerIdTF.getText());
+				int quantity = Integer.parseInt(productQuantityTF.getText());
+				
+				String productItem = searchCombo.getSelectedItem().toString();
+				String [] productContent = productItem.split(" ");
+				int productId = Integer.parseInt(productContent[0]);
+				
+				String sellerItem = searchCombo.getSelectedItem().toString();
+				String [] sellerContent = sellerItem.split(" ");
+				int seller = Integer.parseInt(sellerContent[0]);
+				
+				String buyerItem = searchCombo.getSelectedItem().toString();
+				String [] buyerContent = buyerItem.split(" ");
+				int buyer = Integer.parseInt(buyerContent[0]);
 				
 				conn = DBHelper.getConnection();
 				try {
 					state = conn.prepareStatement("INSERT INTO ORDERS VALUES(null, ?, ?, ?, ?);");
-					state.setInt(1, prodName);
-					state.setInt(2, productQuantity);
-					state.setInt(3, sellerId);
-					state.setInt(4, buyerId);
+					state.setInt(1, quantity);
+					state.setInt(2, productId);
+					state.setInt(3, seller);
+					state.setInt(4, buyer);
 					
 					state.execute();
-					ordersTable.setModel(DBHelper.getAllData("ORDERS"));
-					DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
+					ordersTable.setModel(DBHelper.getAllDataTable());
+					DBHelper.FillCombo(searchCombo, "ORDER_ID",  "ORDERS");
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -187,7 +267,7 @@ JFrame frame = new JFrame("ProductFrame");
 			}
 		}
 		
-		class DeleteAction implements ActionListener{
+		public class DeleteAction implements ActionListener{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -207,20 +287,40 @@ JFrame frame = new JFrame("ProductFrame");
 			}
 		}
 
-		class SearchAction implements ActionListener{
+		
+//		public class EditAction implements ActionListener{
+//			public void actionPerformed(ActionEvent e) {
+//			
+//					conn = DBHelper.getConnection();
+//					String sql = "UPDATE  SET PRODUCT_NAME = \'" + prodNameTF.getText() + "\', BEGIN_PRICE = \'"  + beginPriceTF.getText() + "\' , STOCK_PRICE = \'" + stockPriceTF.getText() + "\', QUANTITY = \'" + quantityTF.getText() + "\' WHERE ID=?;";
+//					try {
+//						state = conn.prepareStatement(sql);
+//						state.setInt(1, id);
+//						state.execute();
+//						id = -1;
+//						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+//						DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
+//					} catch (SQLException e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//			}
+//		}
+		
+		public class SearchAction implements ActionListener{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				String item = searchCombo.getSelectedItem().toString();
 				String [] content = item.split(" ");
-				int orderId = Integer.parseInt(content[0]);
+				int personId = Integer.parseInt(content[0]);
 				
 				conn = DBHelper.getConnection();
-				String sql = "select * from products where id=?";
+				String sql = "select * from orders where id=?";
 				try {
 					state = conn.prepareStatement(sql);
-					state.setInt(1, orderId);
+					state.setInt(1, personId);
 					result = state.executeQuery();
 					ordersTable.setModel(new MyModel(result));
 				} catch (SQLException e1) {
@@ -234,24 +334,24 @@ JFrame frame = new JFrame("ProductFrame");
 			
 		}
 
-		class SearchAllAction implements ActionListener{
+		public class SearchAllAction implements ActionListener{
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 					conn = DBHelper.getConnection();
 				
-					String sql = "SELECT * FROM ORDERS";
+					String sql = "select * from orders";
 					
 					try {
 						state = conn.prepareStatement(sql);
 						state.execute();	
-						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+						ordersTable.setModel(DBHelper.getAllDataTable());
 						
 						
 					} catch (SQLException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
-				
+				}
 			}
-		}
+		
 }
