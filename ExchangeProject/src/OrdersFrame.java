@@ -20,7 +20,7 @@ import javax.swing.JTextField;
 
 
 public class OrdersFrame extends JFrame{
-JFrame frame = new JFrame("ProductFrame");
+JFrame frame = new JFrame("Order Frame");
 	
 	//table for products
 	JTable ordersTable = new JTable();
@@ -96,6 +96,7 @@ JFrame frame = new JFrame("ProductFrame");
 			//add DeleteAction
 			deleteBtn.addActionListener(new DeleteAction());
 			searchBtn.addActionListener(new SearchAction());
+			editBtn.addActionListener(new EditAction());
 			allBtn.addActionListener(new SearchAllAction());
 			
 			DBHelper.FillCombo(searchCombo, "PRODUCT_ID",  "ORDERS");
@@ -126,6 +127,13 @@ JFrame frame = new JFrame("ProductFrame");
 				 //TODO Auto-generated method stub
 				int row = ordersTable.getSelectedRow();
 				id = Integer.parseInt(ordersTable.getValueAt(row, 0).toString());
+			
+				if(e.getClickCount()==2) {
+					prodNameTF.setSelectedItem(ordersTable.getValueAt(row, 1));
+					productQuantityTF.setText(ordersTable.getValueAt(row, 2).toString());
+					sellerIdTF.setSelectedItem(ordersTable.getValueAt(row, 3));
+					buyerIdTF.setSelectedItem(ordersTable.getValueAt(row, 4));
+				}
 			}
 
 			@Override
@@ -152,8 +160,8 @@ JFrame frame = new JFrame("ProductFrame");
 				
 			}
 			
-		
-		class DeleteAction implements ActionListener{
+		}
+		class DeleteAction implements ActionListener {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -173,69 +181,19 @@ JFrame frame = new JFrame("ProductFrame");
 			}
 		}
 
-		class SearchAction implements ActionListener{
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				 //TODO Auto-generated method stub
-				String item = searchCombo.getSelectedItem().toString();
-				String [] content = item.split(" ");
-				int orderId = Integer.parseInt(content[0]);
-				
-				conn = DBHelper.getConnection();
-				String sql = "select * from orders where id=?";
-				try {
-					state = conn.prepareStatement(sql);
-					state.setInt(1, orderId);
-					result = state.executeQuery();
-					ordersTable.setModel(new MyModel(result));
-				} catch (SQLException e1) {
-					 //TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (Exception e1) {
-					 //TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-			
-		}
-
-		class SearchAllAction implements ActionListener{
-			public void actionPerformed(ActionEvent e) {
-				 //TODO Auto-generated method stub
-					conn = DBHelper.getConnection();
-				
-					String sql = "SELECT * FROM ORDERS";
-					
-					try {
-						state = conn.prepareStatement(sql);
-						state.execute();	
-						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
-						
-						
-					} catch (SQLException e1) {
-						 //TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				
-			}
-		}
-	}
-
-
 		class AddAction implements ActionListener{
 			public void actionPerformed(ActionEvent arg0) {
 				int quantity = Integer.parseInt(productQuantityTF.getText());
 				
-				String productItem = searchCombo.getSelectedItem().toString();
+				String productItem = prodNameTF.getSelectedItem().toString();
 				String [] productContent = productItem.split(" ");
 				int productId = Integer.parseInt(productContent[0]);
 				
-				String sellerItem = searchCombo.getSelectedItem().toString();
+				String sellerItem = sellerIdTF.getSelectedItem().toString();
 				String [] sellerContent = sellerItem.split(" ");
 				int seller = Integer.parseInt(sellerContent[0]);
 				
-				String buyerItem = searchCombo.getSelectedItem().toString();
+				String buyerItem = buyerIdTF.getSelectedItem().toString();
 				String [] buyerContent = buyerItem.split(" ");
 				int buyer = Integer.parseInt(buyerContent[0]);
 				
@@ -249,7 +207,7 @@ JFrame frame = new JFrame("ProductFrame");
 					
 					state.execute();
 					ordersTable.setModel(DBHelper.getAllDataTable());
-					DBHelper.FillCombo(searchCombo, "ORDER_ID",  "ORDERS");
+					DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -266,46 +224,39 @@ JFrame frame = new JFrame("ProductFrame");
 				clearForm();
 			}
 		}
-		
-		public class DeleteAction implements ActionListener{
 
-			@Override
+		
+		public class EditAction implements ActionListener{
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				conn = DBHelper.getConnection();
-				String sql = "DELETE FROM ORDERS WHERE ID=?";
-				try {
-					state = conn.prepareStatement(sql);
-					state.setInt(1, id);
-					state.execute();
-					ordersTable.setModel(DBHelper.getAllData("ORDERS"));
-					id = -1;
-				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			
+				String productItem = prodNameTF.getSelectedItem().toString();
+				String[] productContent = productItem.split(" ");
+				int productId = Integer.parseInt(productContent[0]);
+				
+				String sellerItem = sellerIdTF.getSelectedItem().toString();
+				String[] sellerContent = sellerItem.split(" ");
+				int seller = Integer.parseInt(sellerContent[0]);
+				
+				String buyerItem = buyerIdTF.getSelectedItem().toString();
+				String[] buyerContent = buyerItem.split(" ");
+				int buyer = Integer.parseInt(buyerContent[0]);
+				
+					conn = DBHelper.getConnection();
+			
+					String sql = "UPDATE ORDERS SET PRODUCT_ID = " + productId + ", QUANTITY_SOLD = \'"  + productQuantityTF.getText() + "\', SELLER_ID = "+ seller + ", BUYER_ID = "+ buyer + "  WHERE ID=?;";
+							try {
+						state = conn.prepareStatement(sql);
+						state.setInt(1, id);
+						state.execute();
+						id = -1;
+						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
+						DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 			}
 		}
-
-		
-//		public class EditAction implements ActionListener{
-//			public void actionPerformed(ActionEvent e) {
-//			
-//					conn = DBHelper.getConnection();
-//					String sql = "UPDATE  SET PRODUCT_NAME = \'" + prodNameTF.getText() + "\', BEGIN_PRICE = \'"  + beginPriceTF.getText() + "\' , STOCK_PRICE = \'" + stockPriceTF.getText() + "\', QUANTITY = \'" + quantityTF.getText() + "\' WHERE ID=?;";
-//					try {
-//						state = conn.prepareStatement(sql);
-//						state.setInt(1, id);
-//						state.execute();
-//						id = -1;
-//						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
-//						DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
-//					} catch (SQLException e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//			}
-//		}
 		
 		public class SearchAction implements ActionListener{
 
@@ -339,7 +290,22 @@ JFrame frame = new JFrame("ProductFrame");
 				// TODO Auto-generated method stub
 					conn = DBHelper.getConnection();
 				
-					String sql = "select * from orders";
+					String sql = "SELECT\r\n"
+				    		+ "    O.ID, O.QUANTITY_SOLD AS PRODUCT_QUANTITY,\r\n"
+				    		+ "P.PROFIT, P.PRODUCT_NAME AS PRODUCT,\r\n"
+				    		+ "    U1.NAME as BUYER,\r\n"
+				    		+ "    U2.NAME as SELLER\r\n"
+				    		+ "FROM\r\n"
+				    		+ "    ORDERS O,\r\n"
+				    		+ "    USERS U1,\r\n"
+				    		+ "USERS U2,\r\n"
+				    		+ "PRODUCTS P\r\n"
+				    		+ "WHERE\r\n"
+				    		+ "        U1.ID= O.BUYER_ID\r\n"
+				    		+ "    AND\r\n"
+				    		+ "        U2.ID= O.SELLER_ID\r\n"
+				    		+ "AND \r\n"
+				    		+ "P.ID = O.PRODUCT_ID";
 					
 					try {
 						state = conn.prepareStatement(sql);

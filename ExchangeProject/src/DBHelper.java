@@ -51,17 +51,17 @@ public class DBHelper {
 	    String sql = "SELECT\r\n"
 	    		+ "    O.ID, O.QUANTITY_SOLD AS PRODUCT_QUANTITY,\r\n"
 	    		+ "P.PROFIT, P.PRODUCT_NAME AS PRODUCT,\r\n"
-	    		+ "    U1.NAME as BUYER,\r\n"
-	    		+ "    U2.NAME as SELLER\r\n"
+	    		+ "    U1.NAME AS BUYER,\r\n"
+	    		+ "    U2.NAME AS SELLER\r\n"
 	    		+ "FROM\r\n"
 	    		+ "    ORDERS O,\r\n"
 	    		+ "    USERS U1,\r\n"
 	    		+ "USERS U2,\r\n"
 	    		+ "PRODUCTS P\r\n"
 	    		+ "WHERE\r\n"
-	    		+ "        U1.ID= O.BUYER_ID\r\n"
+	    		+ "        U1.ID= O.SELLER_ID\r\n"
 	    		+ "    AND\r\n"
-	    		+ "        U2.ID= O.SELLER_ID\r\n"
+	    		+ "        U2.ID= O.BUYER_ID\r\n"
 	    		+ "AND \r\n"
 	    		+ "P.ID = O.PRODUCT_ID";
 	    
@@ -97,9 +97,6 @@ public class DBHelper {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
 }
 
 
