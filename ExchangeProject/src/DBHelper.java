@@ -97,6 +97,24 @@ public class DBHelper {
 			e.printStackTrace();
 		}
 	}
+	
+	public static void FillComboOrders(JComboBox<String> combo) {
+		
+		conn = getConnection();
+		String sql = "SELECT PRODUCTS.ID , PRODUCTS.PRODUCT_NAME from PRODUCTS, ORDERS WHERE ORDERS.PRODUCT_ID = PRODUCTS.ID;";
+		try {
+			state = conn.prepareStatement(sql);
+			result = state.executeQuery();
+			combo.removeAllItems();
+			while(result.next()) {
+				String item = result.getObject(1).toString()+ " " + result.getObject(2).toString();				
+				combo.addItem(item);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
 
 

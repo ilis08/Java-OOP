@@ -43,8 +43,8 @@ JFrame frame = new JFrame("Order Frame");
 	JLabel sellerIdL = new JLabel("Seller");
 	JLabel buyerIdL = new JLabel("Buyer");
 	
-	JComboBox<String> prodNameTF = new JComboBox<String>();
 	JTextField productQuantityTF = new JTextField();
+	JComboBox<String> prodNameTF = new JComboBox<String>();
 	JComboBox<String> sellerIdTF = new JComboBox<String>();
 	JComboBox<String> buyerIdTF = new JComboBox<String>();
 
@@ -64,15 +64,14 @@ JFrame frame = new JFrame("Order Frame");
 
 			//Up Panel
 			upPanel.setLayout(new GridLayout(4, 2));
-			upPanel.add(productNameL);
-			upPanel.add(prodNameTF);
 			upPanel.add(productQuantityL);
 			upPanel.add(productQuantityTF);
+			upPanel.add(productNameL);
+			upPanel.add(prodNameTF);
 			upPanel.add(sellerIdL);
 			upPanel.add(sellerIdTF);
 			upPanel.add(buyerIdL);
 			upPanel.add(buyerIdTF);
-			upPanel.add(allBtn);
 			
 			
 			DBHelper.FillCombo(prodNameTF, "Product_Name", "Products");
@@ -99,7 +98,7 @@ JFrame frame = new JFrame("Order Frame");
 			editBtn.addActionListener(new EditAction());
 			allBtn.addActionListener(new SearchAllAction());
 			
-			DBHelper.FillCombo(searchCombo, "PRODUCT_ID",  "ORDERS");
+			DBHelper.FillCombo(searchCombo, "PRODUCT_NAME", "PRODUCTS");
 			
 			//Down Panel
 			
@@ -129,8 +128,9 @@ JFrame frame = new JFrame("Order Frame");
 				id = Integer.parseInt(ordersTable.getValueAt(row, 0).toString());
 			
 				if(e.getClickCount()==2) {
-					prodNameTF.setSelectedItem(ordersTable.getValueAt(row, 1));
-					productQuantityTF.setText(ordersTable.getValueAt(row, 2).toString());
+					productQuantityTF.setText(ordersTable.getValueAt(row, 1).toString());
+					prodNameTF.setSelectedItem(ordersTable.getValueAt(row, 2));
+					
 					sellerIdTF.setSelectedItem(ordersTable.getValueAt(row, 3));
 					buyerIdTF.setSelectedItem(ordersTable.getValueAt(row, 4));
 				}
@@ -207,7 +207,7 @@ JFrame frame = new JFrame("Order Frame");
 					
 					state.execute();
 					ordersTable.setModel(DBHelper.getAllDataTable());
-					DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
+					DBHelper.FillCombo(searchCombo, "PRODUCT_NAME", "PRODUCTS");
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -250,7 +250,7 @@ JFrame frame = new JFrame("Order Frame");
 						state.execute();
 						id = -1;
 						ordersTable.setModel(DBHelper.getAllData("ORDERS"));
-						DBHelper.FillCombo(searchCombo, "ID",  "ORDERS");
+						DBHelper.FillCombo(searchCombo, "PRODUCT_NAME",  "PRODUCTS");
 					} catch (SQLException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -268,7 +268,24 @@ JFrame frame = new JFrame("Order Frame");
 				int personId = Integer.parseInt(content[0]);
 				
 				conn = DBHelper.getConnection();
-				String sql = "select * from orders where id=?";
+				 String sql = "SELECT\r\n"
+				    		+ "    O.ID, O.QUANTITY_SOLD AS PRODUCT_QUANTITY,\r\n"
+				    		+ "P.PROFIT, P.PRODUCT_NAME AS PRODUCT,\r\n"
+				    		+ "    U1.NAME AS BUYER,\r\n"
+				    		+ "    U2.NAME AS SELLER\r\n"
+				    		+ "FROM\r\n"
+				    		+ "    ORDERS O,\r\n"
+				    		+ "    USERS U1,\r\n"
+				    		+ "USERS U2,\r\n"
+				    		+ "PRODUCTS P\r\n"
+				    		+ "WHERE\r\n"
+				    		+ "        U1.ID= O.SELLER_ID\r\n"
+				    		+ "    AND\r\n"
+				    		+ "        U2.ID= O.BUYER_ID\r\n"
+				    		+ "AND \r\n"
+				    		+ "P.ID = O.PRODUCT_ID \r\n"
+				    		+ "AND O.PRODUCT_ID=?";
+				 
 				try {
 					state = conn.prepareStatement(sql);
 					state.setInt(1, personId);

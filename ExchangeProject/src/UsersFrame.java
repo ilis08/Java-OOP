@@ -23,7 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import ProductFrame.EditAction;
+
 
 
 public class UsersFrame extends JFrame {
